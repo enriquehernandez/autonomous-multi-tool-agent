@@ -107,6 +107,8 @@ Inicia la API de FastAPI:
 
 ```bash
 uv run uvicorn app.main:app --reload
+
+uv run uvicorn app.main:app --reload --port 8001
 ```
 
 Accede a la documentación interactiva de la API (Swagger UI) en: http://127.0.0.1:8000/docs
@@ -154,3 +156,10 @@ Enrique Hernández Leiva
 * [LinkedIn](https://www.linkedin.com/in/enrique-hernandez-leiva/)
 * [GitHub](https://github.com/enriquehernandez)
 
+
+## 📸 Capturas de Pantalla
+
+### Prueba Multimodal (Imagen + Texto)
+El agente extrae el monto de un ticket y usa la herramienta de divisas autónomamente.
+
+![Swagger Multimodal](docs/swagger_multimodal.png)

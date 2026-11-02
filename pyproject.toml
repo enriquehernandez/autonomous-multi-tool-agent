@@ -2,22 +2,25 @@
 name = "autonomous-multi-tool-agent"
 version = "0.1.0"
 description = "Agente autónomo con LangGraph, Tool Calling y capacidades multimodales."
-authors = [{ name = "Enrique Hernández", email = "enrique.hernandez@basedos.cl" }]
+readme = "README.md"
+authors = [
+    { name = "Enrique Hernández", email = "ehl.net@gmail.com" }
+]
 requires-python = ">=3.11,<3.13"
 
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "langchain",
-    "langgraph",                 # El framework de agentes top
+    "langgraph",
     "langchain-openai",
-    "langchain-anthropic",
     "langchain-google-genai",
     "langchain-groq",
-    "httpx",                     # Para consumir APIs REST en las tools
+    "httpx",
     "python-dotenv",
     "pydantic-settings",
-    "pytest"
+    "pytest",
+    "python-multipart",
 ]
 
 [build-system]

@@ -1,8 +1,8 @@
-from langgraph.graph import StateGraph, END
-from langgraph.prebuilt import ToolNode
 from typing import TypedDict, Annotated
 import operator
-from langchain_core.messages import BaseMessage, HumanMessage
+from langgraph.graph import StateGraph, END
+from langgraph.prebuilt import ToolNode
+from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from app.core.llm_factory import get_llm
 from app.tools import tools
@@ -22,10 +22,17 @@ llm_with_tools = llm.bind_tools(tools)
 
 
 def call_model(state: AgentState):
-    system_prompt = """Eres un asistente financiero autónomo. 
-    Tu objetivo es ayudar al usuario usando las herramientas disponibles.
-    Si el usuario te envía una imagen de un ticket, extrae el monto y usa la herramienta de conversión de moneda.
-    Si una herramienta falla, informa al usuario elegantemente."""
+    system_prompt = """Eres un asistente financiero autónomo y proactivo. 
+    Tu objetivo es resolver la solicitud del usuario de principio a fin usando las herramientas disponibles.
+
+    Reglas de comportamiento:
+    1. **Prioridad de la Consulta:** Responde siempre a la pregunta de texto del usuario. 
+    2. **Uso de Imágenes:** Si el usuario adjunta una imagen, SOLO úsala si el texto de la consulta hace referencia a ella o si es necesaria para responder la pregunta (ej. "convierte el monto de este ticket"). Si el texto pregunta por el clima y la imagen es un ticket, ignora la imagen y responde solo sobre el clima.
+    3. **Autonomía:** Si el usuario te pide convertir un monto, USA LA HERRAMIENTA `convert_currency` INMEDIATAMENTE.
+    4. **Clima:** Si el usuario pregunta por el clima de una ciudad, ESTIMA sus coordenadas (latitud y longitud) usando tu conocimiento general y usa `get_weather` inmediatamente. Por ejemplo, para Miami usa (25.76, -80.19). No le pidas al usuario las coordenadas.
+    5. **Fallbacks:** Si una herramienta falla, informa al usuario elegantemente y sugiere alternativas.
+    6. **Precisión:** No inventes datos. Si no puedes extraer el monto de la imagen, pide al usuario que la vuelva a subir.
+    """
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", system_prompt),
