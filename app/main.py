@@ -1,0 +1,40 @@
+from fastapi import FastAPI, UploadFile, File, Form
+from pydantic import BaseModel
+from typing import Optional
+import base64
+from langchain_core.messages import HumanMessage
+from app.services.agent_engine import agent_app
+
+app = FastAPI(title="Autonomous Multi-Tool Agent API")
+
+
+@app.post("/chat")
+async def chat_with_agent(
+    query: str = Form(...),
+    image: Optional[UploadFile] = File(None)
+):
+    content = [{"type": "text", "text": query}]
+
+    # Si el usuario sube una imagen (Multimodalidad)
+    if image:
+        image_bytes = await image.read()
+        image_b64 = base64.b64encode(image_bytes).decode('utf-8')
+        content.append({
+            "type": "image_url",
+            "image_url": {"url": f"data:image/jpeg;base64,{image_b64}"}
+        })
+
+    inputs = {"messages": [HumanMessage(content=content)]}
+
+    # Ejecutamos el grafo del agente
+    result = await agent_app.ainvoke(inputs)
+
+    # Extraemos la respuesta final
+    final_response = result["messages"][-1].content
+
+    return {
+        "response": final_response,
+        # Para auditar cuántos pasos dio el agente
+        "steps_taken": len(result["messages"]),
+        "tools_used": [msg.name for msg in result["messages"] if hasattr(msg, 'name')]
+    }
