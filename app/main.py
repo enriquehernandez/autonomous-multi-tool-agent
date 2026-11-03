@@ -44,7 +44,7 @@ async def chat_with_agent(
         inputs = {"messages": [HumanMessage(content=content)]}
 
         # Ejecutamos el grafo del agente
-        result = await agent_app.ainvoke(inputs)
+        result = await agent_app.ainvoke(inputs, config={"recursion_limit": 15})
 
         # Extraemos la respuesta final
         final_response = result["messages"][-1].content

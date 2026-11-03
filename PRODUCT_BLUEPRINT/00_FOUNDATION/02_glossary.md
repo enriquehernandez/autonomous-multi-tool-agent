@@ -20,3 +20,6 @@ Es una estrategia de resiliencia: si una acción falla (ej. una API externa no r
 
 ### ¿Qué es el AgentState?
 Es el objeto que persiste durante toda la ejecución del grafo. Contiene la lista de mensajes (Humano, AI, Tool) y permite que el agente tenga memoria de lo que ha hecho.
+
+### ¿Qué es Tool Chaining (Encadenamiento de Herramientas)?
+Es la capacidad de un agente de usar el resultado de una herramienta como entrada para otra. Por ejemplo, primero usa una API de geocodificación para obtener la latitud/longitud de Miami, y luego usa esos datos en la API del clima. Esto permite resolver problemas complejos en múltiples pasos.

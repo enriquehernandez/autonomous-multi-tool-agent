@@ -67,4 +67,7 @@ workflow.add_conditional_edges("agent", should_continue)
 # Después de usar la tool, vuelve al agente a razonar
 workflow.add_edge("tools", "agent")
 
+# 7. Configuración de ejecución con Fallback de iteraciones
 agent_app = workflow.compile()
+# Nota: Al invocar el agente, puedes limitar los pasos así:
+# result = await agent_app.ainvoke(inputs, config={"recursion_limit": 5})

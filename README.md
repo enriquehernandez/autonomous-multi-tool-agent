@@ -7,9 +7,9 @@ Este proyecto va un paso más allá de un chatbot tradicional: implementa un **c
 ## ✨ Características Principales
 
 - **Agentes Autónomos con LangGraph:** Implementación de un grafo de estados con ciclos de razonamiento, permitiendo al LLM decidir cuándo usar una herramienta, observar el resultado y volver a razonar antes de responder.
-- **Tool Calling & Integración REST:** Conexión robusta con APIs externas (Clima, Divisas) mediante el patrón de herramientas de LangChain (`@tool`).
+- **Tool Calling & Tool Chaining:** Conexión robusta con APIs externas. El agente es capaz de encadenar herramientas de forma autónoma (ej. buscar coordenadas de una ciudad y luego consultar su clima), mediante el patrón de herramientas de LangChain (`@tool`).
 - **Capacidades Multimodales:** El agente puede recibir imágenes (ej. tickets de compra) junto al texto, extrayendo información mediante modelos de visión (GPT-4o / Gemini 1.5) y actuando en consecuencia.
-- **Arquitectura Provider-Agnostic (Factory Pattern):** Cambia entre OpenAI, Google (Gemini) o Groq simplemente modificando una variable de entorno (`.env`).
+- **Arquitectura Provider-Agnostic (Registry Pattern):** Cambia entre OpenAI, Google (Gemini) o Groq simplemente modificando una variable de entorno (`.env`).
 - **Resiliencia y Fallbacks:** Manejo elegante de errores de red, timeouts y límites de tasa (Rate Limits) tanto en las herramientas externas como en los proveedores de LLM.
 - **API REST Moderna:** Endpoints asíncronos documentados automáticamente con FastAPI y Swagger UI.
 - **Gestión de Dependencias:** Utiliza `uv` para una resolución e instalación de paquetes ultrarrápida y reproducible.
@@ -38,7 +38,7 @@ El proyecto sigue una estructura de *Product Blueprint* (Docs-as-Code) y patrone
 ├── 📁 app/                     # Código fuente principal
 │   ├── core/                   # Configuración y Fábrica de LLMs
 │   ├── services/               # Lógica del Grafo (LangGraph)
-│   ├── tools/                  # Herramientas (APIs REST)
+│   ├── tools/                  # Herramientas (currency_tool, weather_tool, geocoding_tool)
 │   └── main.py                 # Endpoints de FastAPI
 │
 ├── 📁 data/                    # Imágenes de prueba (modo multimodal)
@@ -113,6 +113,13 @@ uv run uvicorn app.main:app --reload --port 8001
 
 Accede a la documentación interactiva de la API (Swagger UI) en: http://127.0.0.1:8000/docs
 
+## 🐳 Ejecutar con Docker
+Si prefieres no instalar dependencias locales, puedes usar Docker:
+
+```bash
+docker build -t multi-tool-agent .
+docker run -p 8001:8001 --env-file .env multi-tool-agent
+
 ## 📡 Ejemplo de Uso
 
 ### Caso 1: Consulta de solo texto (Tool Calling)
@@ -142,6 +149,16 @@ Haz un POST a /chat adjuntando una imagen (data/ticket_ejemplo.jpg) en el campo 
 }
 ```
 El agente usará el modelo de visión para extraer el monto del ticket, luego usará la herramienta de divisas y finalmente responderá con la conversión.
+
+### Caso 3: Encadenamiento de Herramientas (Tool Chaining)
+Haz un `POST` a `/chat` sin adjuntar imagen, con el siguiente texto:
+
+```json
+{
+  "query": "¿Cómo está el clima en Miami?"
+}
+```
+El agente detectará que necesita coordenadas, usará la herramienta de geocodificación (`get_coordinates`), y luego pasará esas coordenadas a la herramienta del clima (`get_weather`). La respuesta incluirá ambas herramientas en el campo `tools_used`.
 
 ## 🧪 Ejecutar Pruebas del Agente
 El proyecto incluye un script CLI para probar el agente sin necesidad de levantar el servidor web:

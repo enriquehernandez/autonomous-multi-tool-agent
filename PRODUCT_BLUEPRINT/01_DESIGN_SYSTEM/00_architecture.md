@@ -8,7 +8,7 @@ graph TD
     A[Usuario: Texto + Imagen] --> B(Nodo: Agente LLM)
     B -->|¿Necesita herramienta?| C{Decisión}
     C -->|Sí| D(Nodo: Tool Calling)
-    D -->|API REST Clima/Moneda| E[Servicios Externos]
+    D -->|3 Opciones| E[Currency API / Weather API / Geocoding API]
     E -->|Resultado| B
     C -->|No| F[Respuesta Final al Usuario]
 ```
@@ -46,7 +46,6 @@ sequenceDiagram
 - `LLM Factory`: Configurable vía .env para usar OpenRouter, OpenAI, Google o Groq.
 
 ## 4. Patrones de Diseño Aplicados
-
-- `Factory Pattern`: llm_factory.py permite cambiar de proveedor sin modificar la lógica del agente.
-- `State Machine`: LangGraph modela el agente como un grafo de estados con transiciones condicionales.
-- `Resilience Pattern`: Las tools capturan excepciones y retornan mensajes controlados en lugar de propagar errores.
+- **Registry Pattern (LLM Factory):** Utilizado en `llm_factory.py`. En lugar de usar estructuras condicionales (`if/elif`) para instanciar el proveedor de IA, se utiliza un diccionario (`_PROVIDER_REGISTRY`) que mapea el nombre del proveedor (`OPENROUTER`, `OPENAI`, etc.) a su función constructora. Esto respeta el principio Open/Closed (SOLID), permitiendo agregar nuevos proveedores sin modificar la función principal `get_llm()`.
+- **State Machine:** LangGraph modela el agente como un grafo de estados con transiciones condicionales.
+- **Resilience Pattern:** Las tools capturan excepciones y retornan mensajes controlados en lugar de propagar errores.

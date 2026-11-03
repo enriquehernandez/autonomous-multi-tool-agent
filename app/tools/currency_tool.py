@@ -1,5 +1,6 @@
 import httpx
 from langchain_core.tools import tool
+from app.core.config import settings
 
 
 @tool
@@ -8,41 +9,46 @@ def convert_currency(amount: float, from_currency: str, to_currency: str) -> str
     Convierte un monto de una moneda a otra usando tipos de cambio actuales.
     USA ESTA HERRAMIENTA SIEMPRE que el usuario pida convertir un monto entre monedas,
     o cuando hayas extraído un monto de una imagen y necesites su equivalente en otra moneda.
-
-    Args:
-        amount: El monto a convertir (ej. 27000.0)
-        from_currency: Código ISO de la moneda de origen (ej. 'USD', 'EUR', 'CLP')
-        to_currency: Código ISO de la moneda de destino (ej. 'USD', 'EUR', 'CLP')
-
-    Returns:
-        Un string con el resultado de la conversión o un mensaje de error controlado.
     """
     try:
         from_curr = from_currency.upper()
         to_curr = to_currency.upper()
 
-        # Usamos open.er-api.com (Gratis, sin API Key, soporta CLP)
-        url = f"https://open.er-api.com/v6/latest/{from_curr}"
+        # --- LÓGICA DE SELECCIÓN DE PROVEEDOR ---
+        if settings.EXCHANGE_RATE_API_KEY:
+            # Opción A: Usar ExchangeRate-API (Requiere Key, más datos)
+            url = f"https://v6.exchangerate-api.com/v6/{settings.EXCHANGE_RATE_API_KEY}/latest/{from_curr}"
+            with httpx.Client(timeout=10.0) as client:
+                response = client.get(url)
+                response.raise_for_status()
+                data = response.json()
 
-        with httpx.Client(timeout=10.0) as client:
-            response = client.get(url)
-            response.raise_for_status()
-            data = response.json()
+            if data.get("result") != "success":
+                return f"Error: No se pudo obtener el tipo de cambio para {from_curr} (Proveedor: ExchangeRate-API)."
 
-        # Verificar si la API devolvió éxito
-        if data.get("result") != "success":
-            return f"Error: No se pudo obtener el tipo de cambio para {from_curr}."
+            rate = data.get("conversion_rates", {}).get(to_curr)
+        else:
+            # Opción B: Usar Frankfurter (Gratis, sin Key)
+            url = f"{settings.CURRENCY_API_URL}?base={from_curr}"
+            with httpx.Client(timeout=10.0) as client:
+                response = client.get(url)
+                response.raise_for_status()
+                data = response.json()
 
-        rates = data.get("rates", {})
+            # Frankfurter v2 devuelve una lista
+            rate = None
+            for item in data:
+                if item.get("quote") == to_curr:
+                    rate = item.get("rate")
+                    break
 
-        if to_curr not in rates:
-            return f"Error: La moneda de destino {to_curr} no está soportada por el servicio."
+        if rate is None:
+            return f"Error: La moneda de destino {to_curr} no está soportada o no se encontró tasa."
 
-        # Calcular la conversión
-        rate = rates[to_curr]
         converted_amount = amount * rate
+        provider_name = "ExchangeRate-API" if settings.EXCHANGE_RATE_API_KEY else "Frankfurter"
 
-        return f"{amount:,.2f} {from_curr} equivale a {converted_amount:,.2f} {to_curr} (Tasa de cambio: 1 {from_curr} = {rate:.4f} {to_curr})."
+        return f"{amount:,.2f} {from_curr} equivale a {converted_amount:,.2f} {to_curr} (Tasa: 1 {from_curr} = {rate:.4f} {to_curr}). Fuente: {provider_name}."
 
     except httpx.TimeoutException:
         return "Error: El servicio de conversión de divisas no respondió a tiempo. Intenta nuevamente."

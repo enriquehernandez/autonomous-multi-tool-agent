@@ -20,7 +20,15 @@ Definir el contrato de cada herramienta que el agente puede invocar.
 - **API Externa:** Open-Meteo (`https://api.open-meteo.com`), gratuita, sin autenticación.
 - **Retorno:** String con temperatura y viento, o mensaje de error controlado.
 
+## Tool: `get_coordinates`
+- **Descripción:** Obtiene la latitud y longitud de una ciudad a partir de su nombre.
+- **Parámetros:**
+  - `city` (str): Nombre de la ciudad (ej. "Miami", "Santiago").
+- **API Externa:** Open-Meteo Geocoding (`https://geocoding-api.open-meteo.com`), gratuita, sin autenticación.
+- **Retorno:** String con las coordenadas o mensaje de error controlado.
+
 ## Reglas de Negocio
 1. **Nunca lanzar excepciones no controladas:** Todas las tools deben capturar `httpx.TimeoutException`, `httpx.HTTPStatusError` y `Exception` genéricas.
 2. **Mensajes de error legibles:** El agente debe poder entender el error y comunicarlo al usuario de forma natural.
 3. **Idempotencia:** Las tools de solo lectura (clima, divisas) pueden llamarse múltiples veces sin efectos secundarios.
+4. **Encadenamiento (Tool Chaining):** El agente está diseñado para usar `get_coordinates` como paso previo a `get_weather` cuando el usuario pregunta por el clima en una ciudad específica.
