@@ -34,6 +34,9 @@ jobs:
           GOOGLE_MODEL: "gemini-1.5-pro"
           GROQ_MODEL: "llama-3.3-70b-versatile"
           OPENROUTER_API_KEY: "sk-or-v1-..."
+          EXCHANGE_RATE_API_KEY: ""
+          WEATHER_API_KEY: ""
+          GEOCODING_API_KEY: ""
       - name: Upload coverage to Codecov with GitHub Action
         uses: codecov/codecov-action@v5
         with:
