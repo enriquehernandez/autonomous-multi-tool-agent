@@ -1,5 +1,9 @@
 # 🤖 Autonomous Multi-Tool Agent
 
+[![codecov](https://codecov.io/github/enriquehernandez/autonomous-multi-tool-agent/graph/badge.svg?token=M2S2NZEEJZ)](https://codecov.io/github/enriquehernandez/autonomous-multi-tool-agent)
+
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white) ![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white) ![OpenRouter](https://img.shields.io/badge/OpenRouter-Provider--Agnostic-6467F2?style=for-the-badge) ![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen?style=for-the-badge)
+
 Un agente autónomo de nivel producción construido con **LangGraph** y **FastAPI**, diseñado para razonar, decidir y ejecutar acciones mediante el uso de herramientas externas (APIs REST). 
 
 Este proyecto va un paso más allá de un chatbot tradicional: implementa un **ciclo de razonamiento ReAct** (Reason + Act), capacidades **multimodales** (procesamiento de imágenes) y una **arquitectura resiliente** con estrategias de fallback, demostrando cómo llevar agentes de IA a entornos operativos reales.
