@@ -40,7 +40,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov=app --cov-report=term-missing --cov-report=html"
+addopts = "--cov=app --cov-report=term-missing --cov-report=html --cov-report=xml --junitxml=junit.xml -o junit_family=legacy"
 
 [tool.tomlscript]
 # Levantar el servidor en el puerto 8001
